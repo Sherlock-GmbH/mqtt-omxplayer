@@ -1,0 +1,14 @@
+{
+  "name": "mqtt-omxplayer",
+  "version": "1.0.0",
+  "description": "MQTT message interface for the OMX player.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dirk Dresch",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^2.4.0"
+  }
+}
