@@ -1,42 +1,69 @@
 // var commandLineArgs = require('command-line-args')
 var mqtt = require('mqtt');
-// Init broker URL
-var url = 'tcp://192.168.1.20';
-// TODO use command-line-args
-console.log('MQTT subscriber connecting: ', url);
+var exec = require('child_process').exec;
+var kill = require('tree-kill');
+
+var myLog = function(lbl, vars) {
+  if (verbose) console.log(lbl, vars);
+}
+
+// check for command line arguments
+var args = process.argv.slice(2);
+var opts = {};
+for(var i = 0; i < args.length; i++) {
+  if(args[i].indexOf('=') > 0) {
+    var parts = args[i].split('=');
+    opts[parts[0]] = parts[1];
+  }
+}
+var verbose = (opts.verbose) ? true : false;
+var url = 'tcp://';
+if (opts.username && opts.password) {
+  url += opts.username + ':' + opts.password + '@';
+}
+url += opts.host || 'localhost';
+myLog('MQTT subscriber connecting: ', url);
 var client = mqtt.connect(url);
-// Init references
-var vp = {};
+var sref = null;
+var namespace = opts.namespace || 'namespace';
+var playerId = opts.playerId || 'player01';
 
 client.on('connect', function () {
-  console.log('MQTT subscriber connected: ', url);
-  // subscribe to all topics catch all
-  client.subscribe('#');
+  myLog('MQTT subscriber connected: ', url);
+  var topicSubscription = namespace + '/mqtt-media-player/' + playerId + '/#';
+  myLog('MQTT subscribe to: ', topicSubscription);
+  client.subscribe(topicSubscription);
 });
 
+var stopRunningPlayer = function() {
+  if(sref && sref.pid > 0){
+    kill(sref.pid, 'SIGTERM', function(){
+      myLog('Killed OMX player with PID: ', sref.pid);
+      sref = null;
+    });
+  }
+}
+
 client.on('message', function (topic, message) {
-  // split topic
-  console.log('MQTT subscriber topic: ', topic.toString());
-  // message is Buffer
-  console.log('MQTT subscriber message: ', message.toString())
-  // var topic = message.destinationName;
   var action = topic.toString().split('/').pop();
-  console.log('MQTT subscriber action: ', action);
+  myLog('MQTT subscriber action: ', action);
   var payload = message.toString();
-  console.log('MQTT subscriber payload: ', payload);
+  myLog('MQTT subscriber payload: ', payload);
 
   switch (action) {
-    case 'play':
-      console.log('Play:', payload);
+    case 'play-video':
+      stopRunningPlayer();
+      var call = 'omxplayer -o hdmi ' + payload + ' --orientation 0 --aspect-mode stretch';
+      sref = exec(call);
       break;
-    case 'stop':
-      console.log('Stop');
+    case 'play-audio':
+      stopRunningPlayer();
+      var call = 'omxplayer -o hdmi ' + payload;
+      sref = exec(call);
       break;
-    case 'pause':
-      console.log('Pause');
-      break;
-    case 'resume':
-      console.log('Resume');
+    case 'stop-video':
+    case 'stop-audio':
+      stopRunningPlayer();
       break;
   }
 });

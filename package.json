@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "MQTT message interface for the OMX player.",
   "main": "index.js",
+  "bin": "./index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dirk Dresch",
   "license": "MIT",
   "dependencies": {
-    "mqtt": "^2.4.0"
+    "mqtt": "^2.4.0",
+    "tree-kill": "^1.1.0"
   }
 }
