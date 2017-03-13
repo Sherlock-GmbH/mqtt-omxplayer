@@ -6,8 +6,26 @@ Control your Raspberry PI OMX media player via MQTT messages.
 The script offers some simple parameters which are used to build the connection URL and the identification of your player.
 
 ```
-node index.js host=192.168.1.20 username=myUser password=myPass namespace=myNamespace playerId=myPlayer
+node index.js host=192.168.1.1 username=myUser password=myPass namespace=myNamespace playerId=myPlayer
 ```
+
+### MQTT messages
+
+*play-video*
+topic: myNamespace/mqtt-media-player/myPlayer/play-video
+payload: http://www.example.com/test.mp4
+
+*play-audio*
+topic: myNamespace/mqtt-media-player/myPlayer/play-audio
+payload: http://www.example.com/test.mp3
+
+*stop-video* or *stop-audio*
+topic: myNamespace/mqtt-media-player/myPlayer/stop-video
+payload: empty
+
+*volume-up* or *volume-down*
+topic: myNamespace/mqtt-media-player/myPlayer/volume-up
+payload: empty
 
 ### Setup
 

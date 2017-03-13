@@ -16,12 +16,15 @@ for(var i = 0; i < args.length; i++) {
     opts[parts[0]] = parts[1];
   }
 }
+
+myLog('Command parameters: ', opts);
+
 var verbose = (opts.verbose) ? true : false;
 var url = 'tcp://';
 if (opts.username && opts.password) {
   url += opts.username + ':' + opts.password + '@';
 }
-url += opts.host || 'localhost';
+url += (opts.host) ? opts.host : 'localhost';
 myLog('MQTT subscriber connecting: ', url);
 var client = mqtt.connect(url);
 var sref = null;
@@ -53,17 +56,23 @@ client.on('message', function (topic, message) {
   switch (action) {
     case 'play-video':
       stopRunningPlayer();
-      var call = 'omxplayer -o hdmi ' + payload + ' --orientation 0 --aspect-mode stretch';
+      var call = 'omxplayer -o local ' + payload + ' --orientation 0 --aspect-mode stretch';
       sref = exec(call);
       break;
     case 'play-audio':
       stopRunningPlayer();
-      var call = 'omxplayer -o hdmi ' + payload;
+      var call = 'omxplayer -o local ' + payload;
       sref = exec(call);
       break;
     case 'stop-video':
     case 'stop-audio':
       stopRunningPlayer();
+      break;
+    case 'volume-up':
+      if(sref) sref.stdin.write('+');
+      break;
+    case 'volume-down':
+      if(sref) sref.stdin.write('-');
       break;
   }
 });
