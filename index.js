@@ -64,6 +64,10 @@ client.on('message', function (topic, message) {
       var call = 'omxplayer -o local ' + payload;
       sref = exec(call);
       break;
+    case 'play-video-loop':
+      stopRunningPlayer();
+      sref = exec('trap "exit" INT; while true; do omxplayer -o hdmi ' + payload + '; done')
+      break;
     case 'stop-video':
     case 'stop-audio':
       stopRunningPlayer();
